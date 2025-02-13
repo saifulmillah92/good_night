@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   extend RoutesHelpers
   default_url_options host: ENV.fetch("API_HOST", nil)
 
-  # root not found
+  # ROUTE NOT FOUND
   get      '/' => "errors#route_not_found"
 
   # AUTHENTICATION
@@ -15,7 +15,7 @@ Rails.application.routes.draw do
   # SIGN-UP #
   post     'auth/sign-up' => 'auth#signup'
 
-  # HANDLE ROOT NOT FOUND #
+  # HANDLE ROUTE NOT FOUND #
   match '*path' => 'errors#route_not_found', via: :all, constraints: lambda { |req|
     req.path.exclude? 'rails/active_storage'
   }
