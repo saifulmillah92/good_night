@@ -1,0 +1,6 @@
+API_HOST: localhost:3000
+LOCAL: "true"
+
+DB_NAME_DEV: good-night-dev
+DB_NAME_TEST: good-night-test
+DB_NAME_PRO: good-night-pro
