@@ -15,10 +15,10 @@ class AuthService < AppService
 
   def login(**params)
     user = User.find_by(params.except(:password).to_h.symbolize_keys)
-    assert! user, on_error: t("auth.not_registered")
+    assert! user, on_error: t("auth.invalid_email_or_password")
 
     valid_password = user.authenticate(params[:password])
-    assert! valid_password, on_error: t("auth.invalid_password")
+    assert! valid_password, on_error: t("auth.invalid_email_or_password")
 
     { user: user, authorization: authorization_token(user) }
   end

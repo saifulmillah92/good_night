@@ -15,6 +15,12 @@ Rails.application.routes.draw do
   # SIGN-UP #
   post     'auth/sign-up' => 'auth#signup'
 
+  api(:v1, module: "v1") do
+    # USERS
+    get     'users'         => 'users#index'
+    get     'users/:id'     => 'users#show'
+  end
+
   # HANDLE ROUTE NOT FOUND #
   match '*path' => 'errors#route_not_found', via: :all, constraints: lambda { |req|
     req.path.exclude? 'rails/active_storage'
