@@ -1,10 +1,22 @@
+require_relative 'routes_helpers'
+
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  extend RoutesHelpers
+  default_url_options host: ENV.fetch("API_HOST", nil)
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get "up" => "rails/health#show", as: :rails_health_check
+  # root not found
+  get      '/' => "errors#route_not_found"
 
-  # Defines the root path route ("/")
-  # root "posts#index"
+  # AUTHENTICATION
+  get      'auth'         => 'auth#index'
+  # LOGIN #
+  post     'auth/sign-in' => 'auth#login'
+
+  # SIGN-UP #
+  post     'auth/sign-up' => 'auth#signup'
+
+  # HANDLE ROOT NOT FOUND #
+  match '*path' => 'errors#route_not_found', via: :all, constraints: lambda { |req|
+    req.path.exclude? 'rails/active_storage'
+  }
 end
