@@ -28,4 +28,11 @@
 #       enabled: "ON"
 
 en:
-  hello: "Hello world"
+  ok: OK
+  route_not_found: "Route not found"
+  unauthorized: Unauthorized
+  auth:
+    already_registered: Email already registered
+    not_registered: Email is not registered
+    invalid_password: Email or Password is invalid
+    invalid_email_or_password: Email or Password is invalid

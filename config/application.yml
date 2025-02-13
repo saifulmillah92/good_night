@@ -4,3 +4,6 @@ LOCAL: "true"
 DB_NAME_DEV: good-night-dev
 DB_NAME_TEST: good-night-test
 DB_NAME_PRO: good-night-pro
+
+# TOKEN EXPIRATION TIME
+EXPIRATION_TIME: "25200"
