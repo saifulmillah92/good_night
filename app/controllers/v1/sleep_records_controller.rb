@@ -3,11 +3,13 @@
 module V1
   class SleepRecordsController < V1::ResourceController
     def clock_in
-      # TODO
+      service.clock_in!
+      render_ok
     end
 
     def clock_out
-      # TODO
+      service.clock_out!
+      render_ok
     end
 
     private
