@@ -5,12 +5,31 @@ require "rails_helper"
 RSpec.describe "Auth" do
   before do
     @nick = User.create(email: "nick@gmail.com", password: "password")
+    @capt = User.create(email: "capt@gmail.com", password: "password")
+    @hulk = User.create(email: "hulk@gmail.com", password: "password")
   end
 
   describe "Auth" do
     it "returns ok" do
       get_json "/auth", {}, as_user(@nick)
       expect_response(:ok, data: { id: Integer, email: @nick.email })
+    end
+
+    it "includes followers and followeds count" do
+      @nick.followers << @capt
+      @nick.followers << @hulk
+      @nick.followeds << @capt
+
+      get_json "/auth", {}, as_user(@nick)
+      expect_response(
+        :ok,
+        data: {
+          id: @nick.id,
+          email: @nick.email,
+          followers_count: 2,
+          followeds_count: 1,
+        },
+      )
     end
 
     it "returns unauthenticated when token is expired" do

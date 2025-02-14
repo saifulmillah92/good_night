@@ -86,7 +86,7 @@ RSpec.describe "Auth" do
       expect_error_response(:not_found)
     end
 
-    it "includes followers count" do
+    it "includes followers and followeds count" do
       @nick.followers << @capt
       @nick.followers << @hulk
       @nick.followeds << @capt
@@ -106,8 +106,12 @@ RSpec.describe "Auth" do
 
   describe "Follows" do
     it "returns ok when target is valid" do
+      expect(@nick.followeds_count).to eq(0)
+
       post_json "/v1/users/#{@capt.id}/follows", {}, as_user(@nick)
       expect_response(:ok)
+
+      expect(@nick.reload.followeds_count).to eq(1)
     end
 
     it "returns error when you already followed" do
@@ -133,8 +137,12 @@ RSpec.describe "Auth" do
     before { @nick.followeds << @capt }
 
     it "returns ok" do
+      expect(@nick.followeds_count).to eq(1)
+
       delete_json "/v1/users/#{@capt.id}/unfollows", {}, as_user(@nick)
       expect_response(:ok, message: "Unfollowed successfully")
+
+      expect(@nick.reload.followeds_count).to eq(0)
     end
 
     it "returns error when target is not exist" do
