@@ -32,4 +32,14 @@ class User < ApplicationRecord
             association: :followed_relationships,
             foreign_key: :follower_id,
             class_name: "Follow"
+
+  has_many :sleep_records,
+           class_name: "SleepRecord",
+           dependent: :destroy
+
+  def latest_sleep_record
+    sleep_records.where(clock_out: nil)
+                 .order(created_at: :desc)
+                 .first
+  end
 end

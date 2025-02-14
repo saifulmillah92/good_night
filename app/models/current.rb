@@ -21,4 +21,18 @@ module Current
   class_accessor :offset
   class_accessor :page
   class_accessor :user
+
+  class << self
+    def time_zone
+      Time.find_zone(ENV.fetch("TIME_ZONE", "Jakarta"))
+    end
+
+    def time(*args)
+      args.any? ? time_zone.local(*args) : time_zone.now
+    end
+
+    def use_zone(&block)
+      Time.use_zone(time_zone, &block)
+    end
+  end
 end

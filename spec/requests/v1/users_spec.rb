@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe "Auth" do
+RSpec.describe "Users" do
   before do
     @nick = User.create(email: "nick@gmail.com", password: "password")
     @capt = User.create(email: "capt@gmail.com", password: "password")
@@ -87,8 +87,7 @@ RSpec.describe "Auth" do
     end
 
     it "includes followers and followeds count" do
-      @nick.followers << @capt
-      @nick.followers << @hulk
+      @nick.followers << [@capt, @hulk]
       @nick.followeds << @capt
 
       get_json "/v1/users/#{@nick.id}", {}, as_user(@nick)

@@ -10,3 +10,6 @@ en:
     unfollow_success: Unfollowed successfully
     already_following: You are already following this user
     not_able_to_follow_yourself: You are not able to follow yourself
+  sleep_records:
+    there_is_active_sleep_records: There is an active sleep record.
+    no_active_sleep_records: No active sleep records found.
