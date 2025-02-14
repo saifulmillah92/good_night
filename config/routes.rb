@@ -22,7 +22,7 @@ Rails.application.routes.draw do
     delete  "users/:user_id/unfollows" => "users#unfollows"
 
     # SLEEP RECORDS
-    get   "sleeps"           => "sleeps#index", query_override(sort_column: "duration", sort_direction: )
+    get   "sleeps"           => "sleeps#index", **query_override(sort_column: "duration", sort_direction: "desc")
     post  "sleeps/clock-in"  => "sleeps#follows"
     post  "sleeps/clock-out" => "sleeps#unfollows"
   end
