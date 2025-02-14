@@ -2,7 +2,7 @@
 
 require "rails_helper"
 
-RSpec.describe "Auth" do
+RSpec.describe "Users" do
   before do
     @nick = User.create(email: "nick@gmail.com", password: "password")
     @capt = User.create(email: "capt@gmail.com", password: "password")

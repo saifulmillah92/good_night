@@ -15,6 +15,6 @@ class SleepRecords < ApplicationRepository
   end
 
   def current_user
-    @current_user ||= @options[:current_user]
+    @current_user ||= @options[:current_user] || @options["current_user"]
   end
 end

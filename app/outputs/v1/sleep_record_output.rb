@@ -5,19 +5,24 @@ module V1
     def format
       {
         id: @object.id,
-        user: UserOutput.new(@object.user, use: :format),
+        user_id: @object.user.id,
+        user: UserOutput.new(user, use: :format),
         clock_in: @object.clock_in,
         clock_out: @object.clock_out,
-        duration: humanize_seconds(@object.duration),
-        detail_info: detail_info,
+        duration: @object.duration,
+        **detail_info,
       }
     end
 
     private
 
     def detail_info
-      "Record #{@object.id} from user #{user.email} has " \
-        "#{humanize_seconds(@object.duration)} of sleep length"
+      return {} unless @object.duration
+
+      info = "Record #{@object.id} from user #{user.email} has " \
+               "#{humanize_seconds(@object.duration)} of sleep length"
+
+      { detail_info: info }
     end
 
     def user
@@ -25,6 +30,7 @@ module V1
     end
 
     def humanize_seconds(seconds)
+      return unless seconds
       return @humanize_seconds if defined? @humanize_seconds
 
       hours = seconds / 3600

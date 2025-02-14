@@ -7,7 +7,9 @@ class SleepRecordService < AppService
   end
 
   def all(query = {})
+    query[:following] ||= true
     query[:current_user] = @user
+
     @repository.filter(query).limited.to_a
   end
 
