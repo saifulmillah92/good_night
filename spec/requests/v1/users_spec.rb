@@ -5,6 +5,7 @@ require "rails_helper"
 RSpec.describe "Auth" do
   before do
     @nick = User.create(email: "nick@gmail.com", password: "password")
+    @capt = User.create(email: "capt@gmail.com", password: "password")
     100.times { |i| User.create(email: "user#{i}@gmail.co", password: "password") }
   end
 
@@ -81,6 +82,45 @@ RSpec.describe "Auth" do
 
     it "returns error when id is invalid" do
       get_json "/v1/users/-9999", {}, as_user(@nick)
+      expect_error_response(:not_found)
+    end
+  end
+
+  describe "Follows" do
+    it "returns ok when target is valid" do
+      post_json "/v1/users/#{@capt.id}/follows", {}, as_user(@nick)
+      expect_response(:ok)
+    end
+
+    it "returns error when you already followed" do
+      post_json "/v1/users/#{@capt.id}/follows", {}, as_user(@nick)
+      expect_response(:ok)
+
+      post_json "/v1/users/#{@capt.id}/follows", {}, as_user(@nick)
+      expect_error_response(422, "You are already following this user")
+    end
+
+    it "returns error when target is a current user" do
+      post_json "/v1/users/#{@nick.id}/follows", {}, as_user(@nick)
+      expect_error_response(422, "You are not able to follow yourself")
+    end
+
+    it "returns error when target is not exist" do
+      post_json "/v1/users/-9999/follows", {}, as_user(@nick)
+      expect_error_response(:not_found)
+    end
+  end
+
+  describe "Unfollows" do
+    before { @nick.followeds << @capt }
+
+    it "returns ok" do
+      delete_json "/v1/users/#{@capt.id}/unfollows", {}, as_user(@nick)
+      expect_response(:ok, message: "Unfollowed successfully")
+    end
+
+    it "returns error when target is not exist" do
+      delete_json "/v1/users/-9999/follows", {}, as_user(@nick)
       expect_error_response(:not_found)
     end
   end

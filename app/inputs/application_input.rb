@@ -2,6 +2,7 @@
 
 class ApplicationInput
   include ::Input
+  include ApiHelper
 
   COMMA = /\s*,\s*/
 

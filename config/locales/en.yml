@@ -36,3 +36,8 @@ en:
     not_registered: Email is not registered
     invalid_password: Email or Password is invalid
     invalid_email_or_password: Email or Password is invalid
+  follows:
+    follow_success: Followed successfully
+    unfollow_success: Unfollowed successfully
+    already_following: You are already following this user
+    not_able_to_follow_yourself: You are not able to follow yourself
