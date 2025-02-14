@@ -20,5 +20,5 @@ module Current
   class_accessor :limit
   class_accessor :offset
   class_accessor :page
-  class_accessor :current_user
+  class_accessor :user
 end

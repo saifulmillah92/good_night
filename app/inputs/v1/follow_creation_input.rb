@@ -11,7 +11,7 @@ module V1
     validate :target_user
 
     def target_user
-      return unless user_id.to_i == Current.current_user.id
+      return unless user_id.to_i == Current.user.id
 
       errors.add(:base, t("follows.not_able_to_follow_yourself"))
     end
