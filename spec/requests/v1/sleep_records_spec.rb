@@ -45,6 +45,12 @@ RSpec.describe "Sleep Records" do
       durations = response_body[:data].pluck(:duration)
       durations.each_cons(2) { |a, b| expect(a).to be >= b }
     end
+
+    it "doesn't do n+1 query" do
+      expect do
+        get_json endpoint, {}, as_user(@nick)
+      end.not_to exceed_query_limit(4)
+    end
   end
 
   describe "Clock In and Clock Out" do
