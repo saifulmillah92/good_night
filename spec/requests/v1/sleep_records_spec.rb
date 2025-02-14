@@ -7,6 +7,7 @@ RSpec.describe "Sleep Records" do
     @nick = User.create(email: "nick@gmail.com", password: "password")
     @capt = User.create(email: "capt@gmail.com", password: "password")
     @hulk = User.create(email: "hulk@gmail.com", password: "password")
+    @moona = User.create(email: "moona@gmail.com", password: "password")
   end
 
   describe "List of sleeps records" do
@@ -16,6 +17,7 @@ RSpec.describe "Sleep Records" do
       @nick.followeds << [@capt, @hulk]
       create_random_sleep_records(@capt, Current.time, days: 5)
       create_random_sleep_records(@hulk, Current.time, days: 7)
+      create_random_sleep_records(@moona, Current.time, days: 3)
     end
 
     it "returns sleep records of a user's All following users" do
@@ -24,6 +26,7 @@ RSpec.describe "Sleep Records" do
 
       user_ids = response_body[:data].pluck(:user_id).uniq
       expect(user_ids).to contain_exactly(@capt.id, @hulk.id)
+      expect(user_ids).not_to include(@moona.id)
     end
 
     it "returns sleep records from the previous week" do
@@ -41,6 +44,48 @@ RSpec.describe "Sleep Records" do
 
       durations = response_body[:data].pluck(:duration)
       durations.each_cons(2) { |a, b| expect(a).to be >= b }
+    end
+  end
+
+  describe "Clock In and Clock Out" do
+    it "returns success when clocking in" do
+      expect(@nick.latest_sleep_record).to be_blank
+
+      post_json "/v1/sleeps/clock-in", {}, as_user(@nick)
+      expect_response(:ok)
+
+      expect(@nick.reload.latest_sleep_record).to be_present
+    end
+
+    it "returns error when there is active clock in time" do
+      post_json "/v1/sleeps/clock-in", {}, as_user(@nick)
+      expect_response(:ok)
+
+      expect(@nick.reload.latest_sleep_record).to be_present
+
+      post_json "/v1/sleeps/clock-in", {}, as_user(@nick)
+      expect_error_response(422, "There is an active sleep record.")
+    end
+
+    it "returns success when clocking out" do
+      expect(@nick.latest_sleep_record).to be_blank
+
+      SleepRecordService.new(@nick).clock_in!
+      @nick.reload
+      expect(@nick.sleep_records.last).to be_present
+      expect(@nick.sleep_records.last.clock_out).to be_blank
+
+      post_json "/v1/sleeps/clock-out", {}, as_user(@nick)
+      expect_response(:ok)
+      @nick.reload
+
+      expect(@nick.sleep_records.last.clock_out).to be_present
+      expect(@nick.sleep_records.last.duration).to be_present
+    end
+
+    it "returns error when there no active clock in time" do
+      post_json "/v1/sleeps/clock-out", {}, as_user(@nick)
+      expect_error_response(422, "No active sleep records found.")
     end
   end
 
