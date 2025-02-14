@@ -22,9 +22,9 @@ Rails.application.routes.draw do
     delete  "users/:user_id/unfollows" => "users#unfollows"
 
     # SLEEP RECORDS
-    get   "sleeps"           => "sleeps#index", **query_override(sort_column: "duration", sort_direction: "desc")
-    post  "sleeps/clock-in"  => "sleeps#follows"
-    post  "sleeps/clock-out" => "sleeps#unfollows"
+    get   "sleeps"           => "sleep_records#index", **query_override(sort_column: "duration", sort_direction: "desc")
+    post  "sleeps/clock-in"  => "sleep_records#clock_in"
+    post  "sleeps/clock-out" => "sleep_records#clock_out"
   end
 
   # HANDLE ROUTE NOT FOUND #

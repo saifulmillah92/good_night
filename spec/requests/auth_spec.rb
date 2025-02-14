@@ -16,8 +16,7 @@ RSpec.describe "Auth" do
     end
 
     it "includes followers and followeds count" do
-      @nick.followers << @capt
-      @nick.followers << @hulk
+      @nick.followers << [@capt, @hulk]
       @nick.followeds << @capt
 
       get_json "/auth", {}, as_user(@nick)

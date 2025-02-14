@@ -24,16 +24,16 @@ ActiveRecord::Schema[7.1].define(version: 2025_02_14_150339) do
     t.index ["follower_id"], name: "index_follows_on_follower_id"
   end
 
-  create_table "sleeps", force: :cascade do |t|
+  create_table "sleep_records", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.datetime "clock_in"
     t.datetime "clock_out"
     t.integer "duration"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["created_at"], name: "index_sleeps_on_created_at"
-    t.index ["duration"], name: "index_sleeps_on_duration"
-    t.index ["user_id"], name: "index_sleeps_on_user_id"
+    t.index ["created_at"], name: "index_sleep_records_on_created_at"
+    t.index ["duration"], name: "index_sleep_records_on_duration"
+    t.index ["user_id"], name: "index_sleep_records_on_user_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -50,5 +50,5 @@ ActiveRecord::Schema[7.1].define(version: 2025_02_14_150339) do
 
   add_foreign_key "follows", "users", column: "followed_id"
   add_foreign_key "follows", "users", column: "follower_id"
-  add_foreign_key "sleeps", "users"
+  add_foreign_key "sleep_records", "users"
 end
