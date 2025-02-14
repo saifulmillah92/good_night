@@ -6,6 +6,7 @@ RSpec.describe "Auth" do
   before do
     @nick = User.create(email: "nick@gmail.com", password: "password")
     @capt = User.create(email: "capt@gmail.com", password: "password")
+    @hulk = User.create(email: "hulk@gmail.com", password: "password")
     100.times { |i| User.create(email: "user#{i}@gmail.co", password: "password") }
   end
 
@@ -83,6 +84,23 @@ RSpec.describe "Auth" do
     it "returns error when id is invalid" do
       get_json "/v1/users/-9999", {}, as_user(@nick)
       expect_error_response(:not_found)
+    end
+
+    it "includes followers count" do
+      @nick.followers << @capt
+      @nick.followers << @hulk
+      @nick.followeds << @capt
+
+      get_json "/v1/users/#{@nick.id}", {}, as_user(@nick)
+      expect_response(
+        :ok,
+        data: {
+          id: @nick.id,
+          email: @nick.email,
+          followers_count: 2,
+          followeds_count: 1,
+        },
+      )
     end
   end
 
