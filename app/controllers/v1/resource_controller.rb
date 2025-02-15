@@ -18,6 +18,7 @@ module V1
       render_json result,
                   default_output,
                   current_user: current_user,
+                  show: true,
                   use: show_format
     end
 

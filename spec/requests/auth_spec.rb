@@ -31,6 +31,14 @@ RSpec.describe "Auth" do
       )
     end
 
+    it "doesn't include is_followed attribute" do
+      @nick.followers << [@capt, @hulk]
+      @nick.followeds << @capt
+
+      get_json "/auth", {}, as_user(@nick)
+      expect(response_body[:data]).not_to be_key(:is_followed)
+    end
+
     it "returns unauthenticated when token is expired" do
       token = create_access_token(@nick).token
       Timecop.freeze(2.days.from_now.to_date) do
