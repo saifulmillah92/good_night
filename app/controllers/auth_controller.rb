@@ -6,7 +6,7 @@ class AuthController < ApplicationController
   def index
     render_json current_user,
                 V1::UserOutput,
-                exclude_is_followed: true,
+                excluded_is_followed: true,
                 use: :auth_format
   end
 

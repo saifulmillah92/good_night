@@ -58,7 +58,7 @@ module V1
     end
 
     def excluded_is_followed
-      @options[:exclude_is_followed] || false
+      @options[:excluded_is_followed] || false
     end
 
     def show?
