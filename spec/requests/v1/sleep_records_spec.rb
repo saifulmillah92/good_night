@@ -21,7 +21,8 @@ RSpec.describe "Sleep Records" do
     end
 
     it "returns sleep records of a user's All following users" do
-      get_json endpoint, {}, as_user(@nick)
+      params = { sort_column: "duration", sort_direction: "desc" }
+      get_json endpoint, params, as_user(@nick)
       expect_response(:ok)
 
       user_ids = response_body[:data].pluck(:user_id).uniq
@@ -43,11 +44,90 @@ RSpec.describe "Sleep Records" do
     end
 
     it "sorted based on the duration DESC" do
-      get_json endpoint, {}, as_user(@nick)
+      params = { sort_column: "duration", sort_direction: "desc" }
+      get_json endpoint, params, as_user(@nick)
       expect_response(:ok)
 
       durations = response_body[:data].pluck(:duration)
       durations.each_cons(2) { |a, b| expect(a).to be >= b }
+    end
+
+    context "when use cursor pagination" do
+      before do
+        @params = { limit: 2, sort_column: "duration" }
+      end
+
+      it "returns consistent data sorted by asc" do
+        @params[:sort_direction] = "asc"
+        get_json endpoint, @params, as_user(@nick)
+        expect_response(:ok)
+        page1_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect_response(:ok)
+
+        page2_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect_response(:ok)
+
+        page3_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect_response(:ok)
+        prev_cursor = response_body[:pagination][:prev_cursor]
+
+        @params.delete(:next_cursor)
+        @params[:prev_cursor] = prev_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page3_ids)
+
+        prev_cursor = response_body[:pagination][:prev_cursor]
+        @params[:prev_cursor] = prev_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page2_ids)
+
+        prev_cursor = response_body[:pagination][:prev_cursor]
+        @params[:prev_cursor] = prev_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page1_ids)
+      end
+
+      it "returns consistent data sorted by desc" do
+        @params[:sort_direction] = "desc"
+        get_json endpoint, @params, as_user(@nick)
+        expect_response(:ok)
+        page1_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect_response(:ok)
+
+        page2_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect_response(:ok)
+        prev_cursor = response_body[:pagination][:prev_cursor]
+
+        @params.delete(:next_cursor)
+        @params[:prev_cursor] = prev_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page2_ids)
+
+        prev_cursor = response_body[:pagination][:prev_cursor]
+        @params[:prev_cursor] = prev_cursor
+        get_json endpoint, @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page1_ids)
+      end
     end
 
     it "doesn't do n+1 query" do

@@ -79,6 +79,14 @@ class ApplicationController < ActionController::API
     Current.page = params[:page].to_i
   end
 
+  def initialize_global_variable!
+    initialize_global_limit_offset_variable!
+
+    Current.pagination_type = params[:pagination] || "cursor_pagination"
+    Current.sort_column = params[:sort_column] || "id"
+    Current.sort_direction = params[:sort_direction] || "desc"
+  end
+
   def class_exists?(class_name)
     klass = Module.const_get(class_name)
     klass.is_a?(Class)

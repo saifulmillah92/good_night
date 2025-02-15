@@ -16,7 +16,7 @@ module Outputs
         code: @options[:status],
         message: @options[:message],
         root_key => outputs,
-        **include_counter_data,
+        **pagination,
       }
 
       json.merge!(@options[:metadata]) unless @options[:metadata].nil?
@@ -59,29 +59,42 @@ module Outputs
       Current.page
     end
 
-    def use_page?
-      current_page.positive?
+    def pagination_type
+      Current.pagination_type
     end
 
-    def include_counter_data
-      return limit_offset_counter unless total && limit
-
-      { total: total, **limit_offset_counter, **pagination }
+    def sort_direction
+      Current.sort_direction
     end
 
-    def limit_offset_counter
-      return {} if use_page?
-
-      {
-        limit: limit,
-        current_offset: offset,
-        next_offset: next_offset,
-        prev_offset: prev_offset,
-      }
+    def sort_column
+      Current.sort_column
     end
 
     def pagination
-      return {} unless use_page?
+      {
+        **offset_pagination,
+        **page_pagination,
+        **cursor_pagination,
+      }
+    end
+
+    def offset_pagination
+      return {} unless pagination_type == "offset_pagination"
+
+      {
+        total: total,
+        pagination: {
+          limit: limit,
+          current_offset: offset,
+          next_offset: next_offset,
+          prev_offset: prev_offset,
+        },
+      }
+    end
+
+    def page_pagination
+      return {} unless pagination_type == "page_pagination"
 
       {
         pagination: {
@@ -91,6 +104,39 @@ module Outputs
           total_pages: total_pages,
         },
       }
+    end
+
+    def cursor_pagination
+      return {} unless pagination_type == "cursor_pagination"
+
+      {
+        pagination: {
+          next_cursor: next_cursor&.id,
+          prev_cursor: prev_cursor&.id,
+        },
+      }
+    end
+
+    def next_cursor
+      return @object.last if sort_column == "id"
+      return nil if @object.size < limit || @object.blank?
+
+      key = sort_direction == "asc" ? :max : :min
+      find_cursor(key)
+    end
+
+    def prev_cursor
+      return @object.last if sort_column == "id"
+      return nil if @object.blank?
+
+      key = sort_direction == "asc" ? :min : :max
+      find_cursor(key)
+    end
+
+    def find_cursor(key)
+      @data ||= @object.group_by { |a| a.send(sort_column) }
+      target_value = @object.pluck(sort_column.to_sym).send(key)
+      @data[target_value].send(key)
     end
 
     def next_offset

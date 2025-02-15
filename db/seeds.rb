@@ -8,12 +8,58 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-["nick@gmail.com", "capt@gmail.com", "hulk@gmail.com"].each do |email|
-  User.find_or_initialize_by(email: email)
-      .update!(password: "password")
+def create_sleep_record(user, clock_in, clock_out)
+  new_record = user.sleep_records.new(clock_in: clock_in, clock_out: clock_out)
+  new_record.created_at = clock_in
+  new_record.duration = (clock_out - clock_in).to_i
+  new_record.save!
 end
 
-50.times do |i|
-  User.find_or_initialize_by(email: "user#{i}@gmailcom")
-      .update!(password: "password")
+def create_random_sleep_records(user, current_time, days: 10)
+  days.times do |i|
+    sleep_start_time = current_time - (i + 5).days
+    sleep_length = rand(5..12).hours
+
+    create_sleep_record(user, sleep_start_time, sleep_start_time + sleep_length)
+  end
 end
+
+def users
+  [
+    "nick",
+    "capt",
+    "hulk",
+    "moona",
+    "gings",
+    "gon",
+    "kilua",
+    "kurapika",
+    "leorio",
+    "hisoka",
+    "chrollo",
+    "feitan",
+    "machi",
+    "nobunaga",
+    "shalnark",
+    "pakunoda",
+    "franklin",
+    "phinks",
+    "shizuku",
+    "ovugin",
+    "netero",
+    "wing",
+  ]
+end
+
+users.each do |name|
+  user = User.find_or_initialize_by(email: "#{name}@gmail.com")
+  user.update(password: "password")
+
+  instance_variable_set(:"@#{name}", user)
+end
+
+create_random_sleep_records(@nick, Current.time)
+create_random_sleep_records(@capt, Current.time, days: 8)
+create_random_sleep_records(@hulk, Current.time, days: 10)
+create_random_sleep_records(@moona, Current.time, days: 12)
+create_random_sleep_records(@gings, Current.time, days: 15)

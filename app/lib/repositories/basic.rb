@@ -10,7 +10,7 @@ module Repositories
         scope = default_scope
       end
 
-      @options = Hash(default_options.merge(options.to_h))
+      @options = Hash(default_options.merge(options.to_h)).with_indifferent_access
       @includes = Array(includes)
       @scope = scope
       setup
@@ -106,6 +106,7 @@ module Repositories
     end
 
     def apply_filters(options)
+      options = reorder_cursor(options)
       options.each do |key, value|
         method = "filter_by_#{key}"
 
@@ -118,6 +119,12 @@ module Repositories
         method = "include_#{value}"
         @scope = send(method) || @scope
       end
+    end
+
+    def reorder_cursor(options)
+      return options unless options.key?(:prev_cursor)
+
+      options.except(:prev_cursor).merge(prev_cursor: options[:prev_cursor])
     end
   end
 end

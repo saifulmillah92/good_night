@@ -89,6 +89,96 @@ RSpec.describe "Users" do
       end
     end
 
+    context "when use cursor pagination" do
+      before do
+        @params = { sort_column: "email" }
+      end
+
+      it "returns consistent data sorted by asc" do
+        @params[:sort_direction] = "asc"
+        get_json "/v1/users", @params, as_user(@nick)
+        expect_response(:ok)
+        page1_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect_response(:ok)
+
+        page2_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect_response(:ok)
+
+        page3_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect_response(:ok)
+        prev_cursor = response_body[:pagination][:prev_cursor]
+
+        @params.delete(:next_cursor)
+        @params[:prev_cursor] = prev_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page3_ids)
+
+        prev_cursor = response_body[:pagination][:prev_cursor]
+        @params[:prev_cursor] = prev_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page2_ids)
+
+        prev_cursor = response_body[:pagination][:prev_cursor]
+        @params[:prev_cursor] = prev_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page1_ids)
+      end
+
+      it "returns consistent data sorted by desc" do
+        @params[:sort_direction] = "desc"
+        get_json "/v1/users", @params, as_user(@nick)
+        expect_response(:ok)
+        page1_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect_response(:ok)
+
+        page2_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect_response(:ok)
+
+        page3_ids = response_body[:data].pluck(:id)
+        next_cursor = response_body[:pagination][:next_cursor]
+
+        @params[:next_cursor] = next_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect_response(:ok)
+        prev_cursor = response_body[:pagination][:prev_cursor]
+
+        @params.delete(:next_cursor)
+        @params[:prev_cursor] = prev_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page3_ids)
+
+        prev_cursor = response_body[:pagination][:prev_cursor]
+        @params[:prev_cursor] = prev_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page2_ids)
+
+        prev_cursor = response_body[:pagination][:prev_cursor]
+        @params[:prev_cursor] = prev_cursor
+        get_json "/v1/users", @params, as_user(@nick)
+        expect(response_body[:data].pluck(:id)).to match_array(page1_ids)
+      end
+    end
+
     it "doesn't do n+1 query" do
       expect do
         get_json "/v1/users", {}, as_user(@nick)
