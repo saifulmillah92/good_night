@@ -52,34 +52,51 @@ class ApplicationRepository < Repositories::Base
     @scope.offset(offset)
   end
 
-  def filter_by_cursor(cursor)
-    return @scope unless cursor
-
-    validate_sort_column!(sort_column)
-    cursor_record = @scope.find_by(id: cursor)
-    cursor_value = cursor_record.send(sort_column)
+  def filter_by_next_cursor(cursor_id)
+    validate_value!(:next_cursor, cursor_id)
+    value = find_sort_cursor_value(cursor_id)
 
     case sort_direction
-    when "asc" then next_asc(cursor_value, cursor)
-    when "desc" then next_desc(cursor_value, cursor)
+    when "asc" then next_asc(value, cursor_id)
+    when "desc" then next_desc(value, cursor_id)
     end
   end
 
-  def next_asc(cursor_value, cursor)
+  def filter_by_prev_cursor(cursor_id)
+    validate_value!(:prev_cursor, cursor_id)
+    value = find_sort_cursor_value(cursor_id)
+
+    result = if sort_direction == "asc"
+               next_desc(value, cursor_id).reorder(order_desc(sort_column))
+             else
+               next_asc(value, cursor_id).reorder(order_asc(sort_column))
+             end
+
+    @scope.where(id: result.select(:id))
+  end
+
+  def find_sort_cursor_value(cursor_id)
+    validate_sort_column!(sort_column)
+
+    cursor_record = @scope.find_by(id: cursor_id)
+    cursor_record.send(sort_column)
+  end
+
+  def next_asc(cursor_value, id)
     @scope.where(
       "(#{sort_column} > ?) OR (#{sort_column} = ? AND id > ?)",
       cursor_value,
       cursor_value,
-      cursor,
+      id,
     )
   end
 
-  def next_desc(cursor_value, cursor)
+  def next_desc(cursor_value, id)
     @scope.where(
       "(#{sort_column} < ?) OR (#{sort_column} = ? AND id < ?)",
       cursor_value,
       cursor_value,
-      cursor,
+      id,
     )
   end
 
@@ -89,12 +106,6 @@ class ApplicationRepository < Repositories::Base
 
   def truthly?(truthly)
     truthly.in?(["true", 1, true])
-  end
-
-  def reverse_order
-    opposite_direction = sort_direction == "asc" ? :desc : :asc
-
-    { sort_column => opposite_direction, "id" => opposite_direction }
   end
 
   # Sortable
@@ -137,6 +148,10 @@ class ApplicationRepository < Repositories::Base
       invalid = ActiveModel::StrictValidationFailed
       error_message = "Column #{sort_column} does not exist"
       raise invalid, error_message unless validate_column
+    end
+
+    def validate_value!(key, value)
+      raise ArgumentError, "#{key} cannot be blank" if value.blank?
     end
 
     def order_asc(order_column)

@@ -109,18 +109,34 @@ module Outputs
     def cursor_pagination
       return {} unless pagination_type == "cursor_pagination"
 
-      cursor = find_correct_cursor
-      { pagination: { cursor: cursor&.id } }
+      {
+        pagination: {
+          next_cursor: next_cursor&.id,
+          prev_cursor: prev_cursor&.id,
+        },
+      }
     end
 
-    def find_correct_cursor
+    def next_cursor
       return @object.last if sort_column == "id"
-      return nil if @object.size < limit
+      return nil if @object.size < limit || @object.blank?
 
-      data = @object.group_by { |a| a.send(sort_column) }
       key = sort_direction == "asc" ? :max : :min
+      find_cursor(key)
+    end
+
+    def prev_cursor
+      return @object.last if sort_column == "id"
+      return nil if @object.blank?
+
+      key = sort_direction == "asc" ? :min : :max
+      find_cursor(key)
+    end
+
+    def find_cursor(key)
+      @data ||= @object.group_by { |a| a.send(sort_column) }
       target_value = @object.pluck(sort_column.to_sym).send(key)
-      data[target_value].send(key)
+      @data[target_value].send(key)
     end
 
     def next_offset
