@@ -77,6 +77,7 @@ class ApplicationController < ActionController::API
     Current.limit = (params[:limit] ||= 10).to_i
     Current.offset = params[:offset].to_i
     Current.page = params[:page].to_i
+    Current.pagination_type = params[:pagination] || "cursor_pagination"
   end
 
   def class_exists?(class_name)

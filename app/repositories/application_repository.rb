@@ -52,12 +52,37 @@ class ApplicationRepository < Repositories::Base
     @scope.offset(offset)
   end
 
+  def filter_by_next_cursor(cursor)
+    return @scope unless cursor
+
+    validate_sort_column!(sort_column)
+    cursor_record = @scope.find_by(id: cursor)
+    cursor_value = cursor_record.send(sort_column)
+    @scope.where("(#{sort_column}, id) > (?, ?)", cursor_value, cursor)
+  end
+
+  def filter_by_prev_cursor(cursor)
+    return @scope unless cursor
+
+    validate_sort_column!(sort_column)
+    cursor_record = @scope.find_by(id: cursor)
+    cursor_value = cursor_record.send(sort_column)
+    @scope = @scope.where("(#{sort_column}, id) < (?, ?)", cursor_value, cursor)
+    @scope = @scope.order(reverse_order)
+  end
+
   def filter_by_id(id)
     @scope.where(id: Id[id])
   end
 
   def truthly?(truthly)
     truthly.in?(["true", 1, true])
+  end
+
+  def reverse_order
+    opposite_direction = sort_direction == "asc" ? :desc : :asc
+
+    { sort_column => opposite_direction, "id" => opposite_direction }
   end
 
   # Sortable
@@ -84,18 +109,22 @@ class ApplicationRepository < Repositories::Base
     end
 
     def filter_by_sort_column(sort_column)
-      if sort_column.present?
-        validate_column = @scope.column_names.include?(sort_column.to_s)
-
-        invalid = ActiveModel::StrictValidationFailed
-        error_message = "Column #{sort_column} does not exist"
-        raise invalid, error_message unless validate_column
-      end
+      validate_sort_column!(sort_column)
 
       case sort_direction
       when "asc" then @scope.reorder(order_asc(sort_column))
       when "desc" then @scope.reorder(order_desc(sort_column))
       end
+    end
+
+    def validate_sort_column!(sort_column)
+      return if sort_column.blank?
+
+      validate_column = @scope.column_names.include?(sort_column.to_s)
+
+      invalid = ActiveModel::StrictValidationFailed
+      error_message = "Column #{sort_column} does not exist"
+      raise invalid, error_message unless validate_column
     end
 
     def order_asc(order_column)

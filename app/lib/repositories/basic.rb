@@ -10,7 +10,7 @@ module Repositories
         scope = default_scope
       end
 
-      @options = Hash(default_options.merge(options.to_h))
+      @options = Hash(default_options.merge(options.to_h)).with_indifferent_access
       @includes = Array(includes)
       @scope = scope
       setup
