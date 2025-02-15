@@ -54,7 +54,7 @@ class ApplicationRepository < Repositories::Base
 
   def filter_by_next_cursor(cursor_id)
     validate_value!(:next_cursor, cursor_id)
-    value = find_sort_cursor_value(cursor_id)
+    value = find_sort_column_cursor_value(cursor_id)
 
     case sort_direction
     when "asc" then next_asc(value, cursor_id)
@@ -64,7 +64,7 @@ class ApplicationRepository < Repositories::Base
 
   def filter_by_prev_cursor(cursor_id)
     validate_value!(:prev_cursor, cursor_id)
-    value = find_sort_cursor_value(cursor_id)
+    value = find_sort_column_cursor_value(cursor_id)
 
     result = if sort_direction == "asc"
                next_desc(value, cursor_id).reorder(order_desc(sort_column))
@@ -75,7 +75,7 @@ class ApplicationRepository < Repositories::Base
     @scope.where(id: result.select(:id))
   end
 
-  def find_sort_cursor_value(cursor_id)
+  def find_sort_column_cursor_value(cursor_id)
     validate_sort_column!(sort_column)
 
     cursor_record = @scope.find_by(id: cursor_id)
