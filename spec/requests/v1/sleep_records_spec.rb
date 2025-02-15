@@ -29,7 +29,7 @@ RSpec.describe "Sleep Records" do
       expect(user_ids).not_to include(@moona.id)
     end
 
-    it "returns sleep records from the previous week" do
+    it "doesn't return sleep records from this week" do
       SleepRecordService.new(@capt).clock_in!
       get_json endpoint, {}, as_user(@nick)
       expect_response(:ok)
@@ -99,6 +99,7 @@ RSpec.describe "Sleep Records" do
 
   def create_sleep_record(user, clock_in, clock_out)
     new_record = user.sleep_records.new(clock_in: clock_in, clock_out: clock_out)
+    new_record.created_at = clock_in
     new_record.duration = (clock_out - clock_in).to_i
     new_record.save!
   end
