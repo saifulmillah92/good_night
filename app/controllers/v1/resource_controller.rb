@@ -2,7 +2,7 @@
 
 module V1
   class ResourceController < ::ApplicationController
-    before_action :initialize_global_limit_offset_variable!
+    before_action :initialize_global_variable!
 
     def index
       result = service.all(params)

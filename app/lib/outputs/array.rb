@@ -63,9 +63,16 @@ module Outputs
       Current.pagination_type
     end
 
+    def sort_direction
+      Current.sort_direction
+    end
+
+    def sort_column
+      Current.sort_column
+    end
+
     def pagination
       {
-        total: total,
         **offset_pagination,
         **page_pagination,
         **cursor_pagination,
@@ -76,10 +83,13 @@ module Outputs
       return {} unless pagination_type == "offset_pagination"
 
       {
-        limit: limit,
-        current_offset: offset,
-        next_offset: next_offset,
-        prev_offset: prev_offset,
+        total: total,
+        pagination: {
+          limit: limit,
+          current_offset: offset,
+          next_offset: next_offset,
+          prev_offset: prev_offset,
+        },
       }
     end
 
@@ -99,12 +109,18 @@ module Outputs
     def cursor_pagination
       return {} unless pagination_type == "cursor_pagination"
 
-      {
-        cursor: {
-          next_cursor: next_cursor,
-          prev_cursor: prev_cursor,
-        },
-      }
+      cursor = find_correct_cursor
+      { pagination: { cursor: cursor&.id } }
+    end
+
+    def find_correct_cursor
+      return @object.last if sort_column == "id"
+      return nil if @object.size < limit
+
+      data = @object.group_by { |a| a.send(sort_column) }
+      key = sort_direction == "asc" ? :max : :min
+      target_value = @object.pluck(sort_column.to_sym).send(key)
+      data[target_value].send(key)
     end
 
     def next_offset
@@ -125,14 +141,6 @@ module Outputs
 
     def prev_page
       current_page > 1 ? current_page - 1 : nil
-    end
-
-    def next_cursor
-      @object.last&.id
-    end
-
-    def prev_cursor
-      @object.first&.id
     end
 
     def error?

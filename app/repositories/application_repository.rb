@@ -52,23 +52,35 @@ class ApplicationRepository < Repositories::Base
     @scope.offset(offset)
   end
 
-  def filter_by_next_cursor(cursor)
+  def filter_by_cursor(cursor)
     return @scope unless cursor
 
     validate_sort_column!(sort_column)
     cursor_record = @scope.find_by(id: cursor)
     cursor_value = cursor_record.send(sort_column)
-    @scope.where("(#{sort_column}, id) > (?, ?)", cursor_value, cursor)
+
+    case sort_direction
+    when "asc" then next_asc(cursor_value, cursor)
+    when "desc" then next_desc(cursor_value, cursor)
+    end
   end
 
-  def filter_by_prev_cursor(cursor)
-    return @scope unless cursor
+  def next_asc(cursor_value, cursor)
+    @scope.where(
+      "(#{sort_column} > ?) OR (#{sort_column} = ? AND id > ?)",
+      cursor_value,
+      cursor_value,
+      cursor,
+    )
+  end
 
-    validate_sort_column!(sort_column)
-    cursor_record = @scope.find_by(id: cursor)
-    cursor_value = cursor_record.send(sort_column)
-    @scope = @scope.where("(#{sort_column}, id) < (?, ?)", cursor_value, cursor)
-    @scope = @scope.order(reverse_order)
+  def next_desc(cursor_value, cursor)
+    @scope.where(
+      "(#{sort_column} < ?) OR (#{sort_column} = ? AND id < ?)",
+      cursor_value,
+      cursor_value,
+      cursor,
+    )
   end
 
   def filter_by_id(id)

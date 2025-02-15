@@ -21,6 +21,8 @@ module Current
   class_accessor :offset
   class_accessor :page
   class_accessor :pagination_type
+  class_accessor :sort_column
+  class_accessor :sort_direction
   class_accessor :user
 
   class << self
