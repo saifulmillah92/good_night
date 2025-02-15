@@ -18,6 +18,9 @@ class UserService < AppService
 
   def unfollow(followed_id)
     target_user = find(followed_id)
+    assert! @user.followed_relationships.exists?(followed_id: target_user.id),
+            on_error: t("follows.not_following")
+
     @user.followeds.destroy(target_user)
   end
 end

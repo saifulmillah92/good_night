@@ -144,6 +144,18 @@ RSpec.describe "Users" do
       expect(@nick.reload.followeds_count).to eq(0)
     end
 
+    it "returns error when user is already unfollowed" do
+      expect(@nick.followeds_count).to eq(1)
+
+      delete_json "/v1/users/#{@capt.id}/unfollows", {}, as_user(@nick)
+      expect_response(:ok, message: "Unfollowed successfully")
+
+      expect(@nick.reload.followeds_count).to eq(0)
+
+      delete_json "/v1/users/#{@capt.id}/unfollows", {}, as_user(@nick)
+      expect_error_response(422, "You are not following this user")
+    end
+
     it "returns error when target is not exist" do
       delete_json "/v1/users/-9999/follows", {}, as_user(@nick)
       expect_error_response(:not_found)
