@@ -126,6 +126,35 @@ RSpec.describe "Users" do
       )
     end
 
+    it "returns is_followed true when nick is following the user" do
+      @nick.followeds << [@capt]
+      get_json "/v1/users/#{@capt.id}", {}, as_user(@nick)
+      expect_response(
+        :ok,
+        data: {
+          id: @capt.id,
+          email: @capt.email,
+          followers_count: 1,
+          followeds_count: 0,
+          is_followed: true,
+        },
+      )
+    end
+
+    it "returns is_followed false when nick is not following the user" do
+      get_json "/v1/users/#{@capt.id}", {}, as_user(@nick)
+      expect_response(
+        :ok,
+        data: {
+          id: @capt.id,
+          email: @capt.email,
+          followers_count: 0,
+          followeds_count: 0,
+          is_followed: false,
+        },
+      )
+    end
+
     it "includes is_followed attribute" do
       get_json "/v1/users/#{@capt.id}", {}, as_user(@nick)
 

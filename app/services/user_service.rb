@@ -8,9 +8,8 @@ class UserService < AppService
 
   def all(query = {})
     result = super
-    followeds = @user.followed_relationships
-                     .where(followed_id: result.pluck(:id))
-                     .index_by(&:followed_id)
+    followeds = followed_relationships.where(followed_id: result.pluck(:id))
+                                      .index_by(&:followed_id)
 
     { result: result, followeds: followeds }
   end
@@ -35,7 +34,7 @@ class UserService < AppService
 
   private
 
-  def followed_users(result)
-    @user.followed_relationships.where(followed_id: result.pluck(:id))
+  def followed_relationships
+    @user.followed_relationships
   end
 end
