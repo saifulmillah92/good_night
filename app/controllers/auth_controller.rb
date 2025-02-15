@@ -4,7 +4,10 @@ class AuthController < ApplicationController
   before_action :authenticate_user, only: :index
 
   def index
-    render_json current_user, V1::UserOutput, use: :auth_format
+    render_json current_user,
+                V1::UserOutput,
+                excluded_is_followed: true,
+                use: :auth_format
   end
 
   def signup

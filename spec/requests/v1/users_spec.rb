@@ -65,10 +65,34 @@ RSpec.describe "Users" do
       expect(first_data_id).to be > second_data_id
     end
 
+    it "doesn't include is_followed attribute " \
+        "for current user" do
+      get_json "/v1/users", {}, as_user(@nick)
+
+      data = response_body[:data].find { |u| u[:id] == @nick.id }
+      expect(data).not_to be_key(:is_followed)
+    end
+
+    context "when nick is following capt and hulk" do
+      it "returns is_followed true for both user" do
+        @nick.followeds << [@capt, @hulk]
+        get_json "/v1/users", { limit: 4 }, as_user(@nick)
+        expect_response(
+          :ok,
+          data: [
+            { id: @nick.id },
+            { id: @capt.id, is_followed: true },
+            { id: @hulk.id, is_followed: true },
+            { id: Integer, is_followed: false },
+          ],
+        )
+      end
+    end
+
     it "doesn't do n+1 query" do
       expect do
         get_json "/v1/users", {}, as_user(@nick)
-      end.not_to exceed_query_limit(3)
+      end.not_to exceed_query_limit(4)
     end
   end
 
@@ -100,6 +124,48 @@ RSpec.describe "Users" do
           followeds_count: 1,
         },
       )
+    end
+
+    it "returns is_followed true when nick is following the user" do
+      @nick.followeds << [@capt]
+      get_json "/v1/users/#{@capt.id}", {}, as_user(@nick)
+      expect_response(
+        :ok,
+        data: {
+          id: @capt.id,
+          email: @capt.email,
+          followers_count: 1,
+          followeds_count: 0,
+          is_followed: true,
+        },
+      )
+    end
+
+    it "returns is_followed false when nick is not following the user" do
+      get_json "/v1/users/#{@capt.id}", {}, as_user(@nick)
+      expect_response(
+        :ok,
+        data: {
+          id: @capt.id,
+          email: @capt.email,
+          followers_count: 0,
+          followeds_count: 0,
+          is_followed: false,
+        },
+      )
+    end
+
+    it "includes is_followed attribute" do
+      get_json "/v1/users/#{@capt.id}", {}, as_user(@nick)
+
+      expect(response_body[:data]).to be_key(:is_followed)
+    end
+
+    it "doesn't include is_followed attribute " \
+       "if target is the current user" do
+      get_json "/v1/users/#{@nick.id}", {}, as_user(@nick)
+
+      expect(response_body[:data]).not_to be_key(:is_followed)
     end
   end
 

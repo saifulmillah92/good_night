@@ -6,6 +6,14 @@ class UserService < AppService
     super(user, User, Users.new)
   end
 
+  def all(query = {})
+    result = super
+    followeds = followed_relationships.where(followed_id: result.pluck(:id))
+                                      .index_by(&:followed_id)
+
+    { result: result, followeds: followeds }
+  end
+
   def follow(params)
     target_user = find(params[:followed_id])
     assert! !@user.followed_relationships.exists?(followed_id: target_user.id),
@@ -22,5 +30,11 @@ class UserService < AppService
             on_error: t("follows.not_following")
 
     @user.followeds.destroy(target_user)
+  end
+
+  private
+
+  def followed_relationships
+    @user.followed_relationships
   end
 end

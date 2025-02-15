@@ -2,6 +2,16 @@
 
 module V1
   class UsersController < V1::ResourceController
+    def index
+      result = service.all(params)
+      render_json_array result[:result],
+                        default_output,
+                        use: format,
+                        current_user: current_user,
+                        followeds: result[:followeds],
+                        total: total_count
+    end
+
     def follows
       input = V1::FollowCreationInput.new(params)
       validate! input

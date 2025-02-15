@@ -17,7 +17,7 @@ class SleepRecordService < AppService
     assert! @user.latest_sleep_record.blank?,
             on_error: t("sleep_records.there_is_active_sleep_records")
 
-    @service.create!(user: @user, clock_in: Current.time)
+    create(user: @user, clock_in: Current.time)
   end
 
   def clock_out!
