@@ -29,13 +29,17 @@ RSpec.describe "Sleep Records" do
       expect(user_ids).not_to include(@moona.id)
     end
 
-    it "returns sleep records from the previous week" do
+    it "doesn't return sleep records from this week" do
       SleepRecordService.new(@capt).clock_in!
-      get_json endpoint, {}, as_user(@nick)
-      expect_response(:ok)
 
-      ids = response_body[:data].pluck(:id)
-      expect(ids).not_to include(@capt.latest_sleep_record.id)
+      Timecop.travel(12.hours.from_now) do
+        SleepRecordService.new(@capt).clock_out!
+        get_json endpoint, {}, as_user(@nick)
+        expect_response(:ok)
+
+        ids = response_body[:data].pluck(:id)
+        expect(ids).not_to include(@capt.sleep_records.last.id)
+      end
     end
 
     it "sorted based on the duration DESC" do
@@ -99,6 +103,7 @@ RSpec.describe "Sleep Records" do
 
   def create_sleep_record(user, clock_in, clock_out)
     new_record = user.sleep_records.new(clock_in: clock_in, clock_out: clock_out)
+    new_record.created_at = clock_in
     new_record.duration = (clock_out - clock_in).to_i
     new_record.save!
   end

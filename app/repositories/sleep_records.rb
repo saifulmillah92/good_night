@@ -5,7 +5,7 @@ class SleepRecords < ApplicationRepository
   private
 
   def default_scope
-    SleepRecord.last_week.includes(:user)
+    SleepRecord.previous_week.includes(:user)
   end
 
   def filter_by_following(value)
