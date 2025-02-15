@@ -82,7 +82,7 @@ class ApplicationController < ActionController::API
   def initialize_global_variable!
     initialize_global_limit_offset_variable!
 
-    Current.pagination_type = params[:pagination] || "cursor_pagination"
+    Current.pagination_type = params[:pagination_type] || "cursor_pagination"
     Current.sort_column = params[:sort_column] || "id"
     Current.sort_direction = params[:sort_direction] || "desc"
   end
