@@ -5,10 +5,10 @@ module V1
     def format
       {
         id: @object.id,
-        # user_id: @object.user.id,
-        # user: UserOutput.new(user, use: :format),
-        # clock_in: @object.clock_in,
-        # clock_out: @object.clock_out,
+        user_id: @object.user.id,
+        user: UserOutput.new(user, use: :format),
+        clock_in: @object.clock_in,
+        clock_out: @object.clock_out,
         duration: @object.duration,
         **detail_info,
       }

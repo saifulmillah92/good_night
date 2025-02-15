@@ -21,7 +21,8 @@ RSpec.describe "Sleep Records" do
     end
 
     it "returns sleep records of a user's All following users" do
-      get_json endpoint, {}, as_user(@nick)
+      params = { sort_column: "duration", sort_direction: "desc" }
+      get_json endpoint, params, as_user(@nick)
       expect_response(:ok)
 
       user_ids = response_body[:data].pluck(:user_id).uniq
@@ -43,7 +44,8 @@ RSpec.describe "Sleep Records" do
     end
 
     it "sorted based on the duration DESC" do
-      get_json endpoint, {}, as_user(@nick)
+      params = { sort_column: "duration", sort_direction: "desc" }
+      get_json endpoint, params, as_user(@nick)
       expect_response(:ok)
 
       durations = response_body[:data].pluck(:duration)
