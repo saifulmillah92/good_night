@@ -16,7 +16,7 @@ module Outputs
 
     def initialize(object, options = {})
       @object = object
-      @options = options
+      @options = options.with_indifferent_access
       @options[:status] ||= 200
       @options[:status] = Rack::Utils.status_code(@options[:status])
       @options[:message] ||= I18n.t("ok")
