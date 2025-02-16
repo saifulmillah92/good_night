@@ -38,6 +38,9 @@ class ApplicationService
     ActiveRecord::Base.connection.open_transactions > @@parent_transaction_count
   end
 
+  class UniqueViolation < ::StandardError
+  end
+
   class NotFound < ::StandardError
   end
 

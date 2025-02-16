@@ -128,6 +128,11 @@ module Outputs
       @message = error.message
     end
 
+    def application_service_unique_violation(error)
+      @options[:status] = 422
+      @message = error.message
+    end
+
     def active_record_record_not_unique(error)
       @options[:status] = 422
       @message = error.message
