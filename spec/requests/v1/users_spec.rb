@@ -264,14 +264,14 @@ RSpec.describe "Users" do
       expect(@nick.followeds_count).to eq(0)
 
       post_json "/v1/users/#{@capt.id}/follows", {}, as_user(@nick)
-      expect_response(:ok)
+      expect_response(:created)
 
       expect(@nick.reload.followeds_count).to eq(1)
     end
 
     it "returns error when you already followed" do
       post_json "/v1/users/#{@capt.id}/follows", {}, as_user(@nick)
-      expect_response(:ok)
+      expect_response(:created)
 
       post_json "/v1/users/#{@capt.id}/follows", {}, as_user(@nick)
       expect_error_response(422, "You are already following this user")

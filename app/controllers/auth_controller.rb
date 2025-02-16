@@ -7,6 +7,7 @@ class AuthController < ApplicationController
     render_json current_user,
                 V1::UserOutput,
                 excluded_is_followed: true,
+                authorization: token,
                 use: :auth_format
   end
 

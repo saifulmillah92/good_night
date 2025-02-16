@@ -3,13 +3,13 @@
 module V1
   class SleepRecordsController < V1::ResourceController
     def clock_in
-      service.clock_in!
-      render_ok
+      result = service.clock_in!
+      render_json result, status: :created
     end
 
     def clock_out
-      service.clock_out!
-      render_ok
+      result = service.clock_out!
+      render_json result
     end
 
     private

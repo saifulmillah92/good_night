@@ -144,14 +144,14 @@ RSpec.describe "Sleep Records" do
       expect(@nick.active_sleep_record).to be_blank
 
       post_json "/v1/sleeps/clock-in", {}, as_user(@nick)
-      expect_response(:ok)
+      expect_response(:created)
 
       expect(@nick.reload.active_sleep_record).to be_present
     end
 
     it "returns error when there is active clock in time" do
       post_json "/v1/sleeps/clock-in", {}, as_user(@nick)
-      expect_response(:ok)
+      expect_response(:created)
 
       expect(@nick.reload.active_sleep_record).to be_present
 

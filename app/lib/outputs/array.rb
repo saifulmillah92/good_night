@@ -126,7 +126,7 @@ module Outputs
     end
 
     def prev_cursor
-      return @object.last if sort_column == "id"
+      return @object.first if sort_column == "id"
       return nil if @object.blank?
 
       key = sort_direction == "asc" ? :min : :max

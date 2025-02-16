@@ -17,6 +17,7 @@ class UserService < AppService
   def follow(params)
     target_user = find(params[:followed_id])
     followed_relationships.create!(followed_id: target_user.id)
+    target_user
   rescue ActiveRecord::RecordNotUnique
     raise UniqueViolation, t("follows.already_following")
   end
@@ -27,6 +28,7 @@ class UserService < AppService
             on_error: t("follows.not_following")
 
     @user.followeds.destroy(target_user)
+    target_user
   end
 
   private

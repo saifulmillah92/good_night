@@ -10,19 +10,19 @@ module V1
         clock_in: @object.clock_in,
         clock_out: @object.clock_out,
         duration: @object.duration,
-        **detail_info,
+        **info,
       }
     end
 
     private
 
-    def detail_info
+    def info
       return {} unless @object.duration
 
       info = "Record #{@object.id} from user #{user.email} has " \
                "#{humanize_seconds(@object.duration)} of sleep length"
 
-      { detail_info: info }
+      { info: info }
     end
 
     def user
