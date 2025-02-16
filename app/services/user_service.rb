@@ -16,17 +16,14 @@ class UserService < AppService
 
   def follow(params)
     target_user = find(params[:followed_id])
-    assert! !@user.followed_relationships.exists?(followed_id: target_user.id),
-            on_error: t("follows.already_following")
-
-    transaction do
-      Follow.create!(follower_id: @user.id, followed_id: target_user.id)
-    end
+    followed_relationships.create!(followed_id: target_user.id)
+  rescue ActiveRecord::RecordNotUnique
+    raise UniqueViolation, t("follows.already_following")
   end
 
   def unfollow(followed_id)
     target_user = find(followed_id)
-    assert! @user.followed_relationships.exists?(followed_id: target_user.id),
+    assert! followed_relationships.exists?(followed_id: target_user.id),
             on_error: t("follows.not_following")
 
     @user.followeds.destroy(target_user)
@@ -35,6 +32,6 @@ class UserService < AppService
   private
 
   def followed_relationships
-    @user.followed_relationships
+    @followed_relationships ||= @user.followed_relationships
   end
 end
