@@ -4,6 +4,8 @@ require "rails_helper"
 
 RSpec.describe "Sleep Records" do
   before do
+    Timecop.freeze(Current.time(2025, 2, 15))
+
     @nick = User.create(email: "nick@gmail.com", password: "password")
     @capt = User.create(email: "capt@gmail.com", password: "password")
     @hulk = User.create(email: "hulk@gmail.com", password: "password")
@@ -139,26 +141,26 @@ RSpec.describe "Sleep Records" do
 
   describe "Clock In and Clock Out" do
     it "returns success when clocking in" do
-      expect(@nick.latest_sleep_record).to be_blank
+      expect(@nick.active_sleep_record).to be_blank
 
       post_json "/v1/sleeps/clock-in", {}, as_user(@nick)
       expect_response(:ok)
 
-      expect(@nick.reload.latest_sleep_record).to be_present
+      expect(@nick.reload.active_sleep_record).to be_present
     end
 
     it "returns error when there is active clock in time" do
       post_json "/v1/sleeps/clock-in", {}, as_user(@nick)
       expect_response(:ok)
 
-      expect(@nick.reload.latest_sleep_record).to be_present
+      expect(@nick.reload.active_sleep_record).to be_present
 
       post_json "/v1/sleeps/clock-in", {}, as_user(@nick)
       expect_error_response(422, "There is an active sleep record.")
     end
 
     it "returns success when clocking out" do
-      expect(@nick.latest_sleep_record).to be_blank
+      expect(@nick.active_sleep_record).to be_blank
 
       SleepRecordService.new(@nick).clock_in!
       @nick.reload

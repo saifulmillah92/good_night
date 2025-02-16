@@ -37,9 +37,9 @@ class User < ApplicationRecord
            class_name: "SleepRecord",
            dependent: :destroy
 
-  def latest_sleep_record
-    sleep_records.where(clock_out: nil)
-                 .order(created_at: :desc)
-                 .first
-  end
+  has_one :active_sleep_record,
+           -> { where(clock_out: nil) },
+           class_name: "SleepRecord",
+           dependent: :destroy,
+           inverse_of: :user
 end
