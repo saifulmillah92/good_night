@@ -28,6 +28,7 @@ class SleepRecordService < AppService
       sleep_record.clock_out = Current.time
       sleep_record.duration = (sleep_record.clock_out - sleep_record.clock_in).to_i
       sleep_record.save!
+      sleep_record
     end
   end
 end

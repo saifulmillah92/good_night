@@ -53,7 +53,7 @@ class ApplicationRepository < Repositories::Base
   end
 
   def filter_by_next_cursor(cursor_id)
-    validate_value!(:next_cursor, cursor_id)
+    validate_cursor_value!(:next_cursor, cursor_id)
     value = find_sort_column_cursor_value(cursor_id)
 
     case sort_direction
@@ -63,7 +63,7 @@ class ApplicationRepository < Repositories::Base
   end
 
   def filter_by_prev_cursor(cursor_id)
-    validate_value!(:prev_cursor, cursor_id)
+    validate_cursor_value!(:prev_cursor, cursor_id)
     value = find_sort_column_cursor_value(cursor_id)
 
     result = if sort_direction == "asc"
@@ -150,8 +150,12 @@ class ApplicationRepository < Repositories::Base
       raise invalid, error_message unless validate_column
     end
 
-    def validate_value!(key, value)
+    def validate_cursor_value!(key, value)
       raise ArgumentError, "#{key} cannot be blank" if value.blank?
+
+      message = "you cannot add both values on next and prev cursor"
+      both_present = @options[:prev_cursor].present? && @options[:next_cursor].present?
+      raise ArgumentError, message if both_present
     end
 
     def order_asc(order_column)

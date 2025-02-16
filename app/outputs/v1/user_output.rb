@@ -30,7 +30,7 @@ module V1
     end
 
     def auth_format
-      full_format
+      full_format.merge(token: authorization)
     end
 
     private

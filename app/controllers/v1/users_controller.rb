@@ -16,13 +16,20 @@ module V1
       input = V1::FollowCreationInput.new(params)
       validate! input
 
-      service.follow(input.output)
-      render_ok message: t("follows.follow_success")
+      result = service.follow(input.output)
+      render_json result,
+                  status: :created,
+                  current_user: current_user,
+                  show: true,
+                  message: t("follows.follow_success")
     end
 
     def unfollows
-      service.unfollow(params[:user_id])
-      render_ok message: t("follows.unfollow_success")
+      result = service.unfollow(params[:user_id])
+      render_json result,
+                  current_user: current_user,
+                  show: true,
+                  message: t("follows.unfollow_success")
     end
 
     private
