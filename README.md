@@ -1,24 +1,45 @@
-# README
+# Good Night App
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Prerequisites
+Make sure you have the following installed on your machine:
 
-Things you may want to cover:
+* Ruby (3.3.0)
+* Rails (7.1.5.1)
+* PostgreSQL (14.15)
 
-* Ruby version
+Installation
 
-* System dependencies
+Clone the repository:
+```shell
+git clone https://github.com/your-username/your-project.git
+```
 
-* Configuration
+Navigate to the project directory:
+```shell
+cd your-project
+```
 
-* Database creation
+Install dependencies:
+```shell
+bundle install
+```
 
-* Database initialization
+Copy Env file from application.yml.example
+```shell
+cp config/application.yml.example config/application.yml
+```
 
-* How to run the test suite
+Set up the database:
+```shell
+rails db:drop:all db:create db:migrate
+```
 
-* Services (job queues, cache servers, search engines, etc.)
+Run Spec:
+```shell
+rspec
+```
 
-* Deployment instructions
-
-* ...
+Run Server:
+```shell
+rails server
+```
